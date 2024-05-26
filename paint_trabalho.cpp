@@ -237,8 +237,8 @@ void menu_transf(int value)
 		case 1: translacao(15, 15); break;
 		case 2: escala(0.8, 0.8); break;
 		case 3: rotacao(45); break;
-		/*case 4: reflexao(false, true); break;
-		case 5: cisalhamento(0.5, 0); break;*/
+		case 4: reflexao(true, false); break;
+		case 5: cisalhamento(0.5, 0); break;
 	}
 	
 	modo = value;
@@ -718,5 +718,91 @@ void rotacao(double angulo)
 			it_vertice->y = round(dx * sen + dy * coss + centro_y);
 		}
 	}
+    glutPostRedisplay();
+}
+
+void reflexao(bool horizontal, bool vertical)
+{
+    for (auto it_forma = formas.begin(); it_forma != formas.end(); it_forma++) 
+	{
+        double centro_x = 0, centro_y = 0;
+		int qtd_vertices = 0;
+
+        // Descobrindo o centro e recalculando
+        for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
+		{
+            centro_x += it_vertice->x;
+            centro_y += it_vertice->y;
+            qtd_vertices++;
+        }
+
+        if (qtd_vertices == 0) return;
+        
+ 	    centro_x /= qtd_vertices;
+        centro_y /= qtd_vertices;
+
+		// Transladar
+		for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
+		{
+            it_vertice->x -= centro_x;
+ 	 	    it_vertice->y -= centro_y;
+ 	 	    
+ 	 	    if (horizontal && vertical)
+ 	 	    {
+			  	it_vertice->x *= -1;
+ 	 	    	it_vertice->y *= -1;
+	        }
+	        else if(horizontal) it_vertice->y *= -1;
+	        else if (vertical) it_vertice->x *= -1;
+        }
+
+		for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
+		{
+            it_vertice->x += centro_x;
+ 	 	    it_vertice->y += centro_y;
+        }
+	}
+    glutPostRedisplay();
+}
+
+void cisalhamento(double dx, double dy) 
+{
+    for (auto it_forma = formas.begin(); it_forma != formas.end(); it_forma++) 
+	{
+        double centro_x = 0, centro_y = 0;
+		int qtd_vertices = 0;
+
+        // Descobrindo o centro e recalculando
+        for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
+		{
+            centro_x += it_vertice->x;
+            centro_y += it_vertice->y;
+            qtd_vertices++;
+        }
+
+        if (qtd_vertices == 0) return;
+        
+ 	    centro_x /= qtd_vertices;
+        centro_y /= qtd_vertices;
+
+		for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
+		{
+            it_vertice->x -= centro_x;
+ 	 	    it_vertice->y -= centro_y;
+        }
+        
+		// Aplicar cisalhamento em relação ao centro do objeto 
+		for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
+		{
+			it_vertice->x = round(it_vertice->x + dx * it_vertice->y);
+			it_vertice->y = round(it_vertice->y + dy * it_vertice->x);
+		}
+		
+		for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
+		{
+            it_vertice->x += centro_x;
+ 	 	    it_vertice->y += centro_y;
+        }
+    }
     glutPostRedisplay();
 }
