@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <forward_list>
 #include "glut_text.h"
+#include <vector>
 
 using namespace std;
 
@@ -339,23 +340,40 @@ void drawPixel(int x, int y){
  *Funcao que desenha a lista de formas geometricas
  */
 
-void drawFormas(){
-    //if(click1) retaImediata(x_1, y_1, m_x, m_y);
-    //if(click1) desenha_quadrilatero(x_1, y_1, m_x, m_y);
-    //if(click2) desenha_triangulo(x_1, y_1, m_x, m_y, x_3, y_3);
+void drawFormas()
+{
+    if(modo == LIN) 
+	{
+		if (click1) retaImediata(x_1, y_1, m_x, m_y);
+	}
     
-    double raio = sqrt(pow(x_1 - m_x, 2) + pow(y_1 - m_y, 2));
-    if(click1) desenha_circulo(x_1, y_1, raio);
+    if (modo == RET)
+	{
+		if(click1) desenha_quadrilatero(x_1, y_1, m_x, m_y);
+	} 
+
+	if (modo == TRI)
+	{
+		if (click1) retaImediata(x_1, y_1, m_x, m_y);
+		if(click2) desenha_triangulo(x_1, y_1, m_x, m_y, x_3, y_3);
+	}
+    
+	if (modo == CIR)
+	{
+		double raio = sqrt(pow(x_1 - m_x, 2) + pow(y_1 - m_y, 2));
+    	if(click1) desenha_circulo(x_1, y_1, raio);
+	}
     
     //Percorre a lista de formas geometricas para desenhar
     for(forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++){
-    	int i = 0, x[10000], y[10000];
+    	int i = 0;
+		vector<double> x, y;
         switch (f->tipo) {
             case LIN:
                 //Percorre a lista de vertices da forma linha para desenhar
                 for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
-                    x[i] = v->x;
-                    y[i] = v->y;
+                    x.push_back(v->x);
+                    y.push_back(v->y);
                 }
                 
                 //Desenha o segmento de reta apos dois cliques
@@ -364,8 +382,8 @@ void drawFormas(){
             
             case RET:
                 for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
-                    x[i] = v->x;
-                    y[i] = v->y;
+                    x.push_back(v->x);
+                    y.push_back(v->y);
                 }
                 
             	// Desenha quadrilatero
@@ -374,8 +392,8 @@ void drawFormas(){
         
         	case TRI:
         		for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
-                    x[i] = v->x;
-                    y[i] = v->y;
+                    x.push_back(v->x);
+                    y.push_back(v->y);
                 }
                 
             	// Desenha triangulo
@@ -396,8 +414,8 @@ void drawFormas(){
             
             case CIR:
         		for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
-                    x[i] = v->x;
-                    y[i] = v->y;
+                    x.push_back(v->x);
+                    y.push_back(v->y);
                 }
                 
             	// Desenha circulo
@@ -574,8 +592,8 @@ void desenha_circulo(double x1, double y1, double raio)
         
         xi++;
 
-	drawPixel(x1 - yi, y1 - xi);
-	drawPixel(x1 - yi, y1 + xi);
+		drawPixel(x1 - yi, y1 - xi);
+		drawPixel(x1 - yi, y1 + xi);
         drawPixel(x1 + xi, y1 + yi);
         drawPixel(x1 + yi, y1 - xi);
         drawPixel(x1 + yi, y1 + xi);
