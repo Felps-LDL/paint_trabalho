@@ -133,7 +133,11 @@ void Bresenham(double x1, double y1, double x2, double y2);
 void desenha_quadrilatero(double x1, double y1, double x2, double y2);
 void desenha_triangulo(double x1, double y1, double x2, double y2, double x3, double y3);
 void desenha_circulo(double x1, double x2, double raio);
-
+void translacao(int x, int y);
+void escala(float sx, float sy);
+void rotacao(float angle);
+void reflexao(bool horizontal, bool vertical);
+void cisalhamento(float shx, float shy);
 
 /*
  * Funcao principal
@@ -159,7 +163,7 @@ int main(int argc, char** argv){
     glutAddMenuEntry("Rotacao", ROT);
     glutAddMenuEntry("Reflexao", REF);
     glutAddMenuEntry("Cisalhamento", CIS);
-    glutAttachMenu();
+    glutAttachMenu(GLUT_MIDDLE_BUTTON);
     
     // Define o menu pop-up
     glutCreateMenu(menu_popup);
@@ -228,16 +232,16 @@ void menu_popup(int value){
 
 void menu_transf(int value)
 {
-	/*if (value == 0) exit(EXIT_SUCCESS);
+	if (value == 0) exit(EXIT_SUCCESS);
 	switch (value){
 		case 1: translacao(30, 30); break;
-		case 2: escala(0.4, 0.4); break;
+		/*case 2: escala(0.4, 0.4); break;
 		case 3: rotacao(45); break;
 		case 4: reflexao(false, true); break;
-		case 5: cisalhamento(0.5, 0); break;
+		case 5: cisalhamento(0.5, 0); break;*/
 	}
 	
-	mode = value;*/
+	modo = value;
 }
 
 /*
@@ -461,9 +465,6 @@ void drawFormas()
     }
 }
 
-/*
- * Fucao que implementa o Algoritmo de Rasterizacao da Reta Imediata
- */
 void retaImediata(double x1, double y1, double x2, double y2){
     double m, b, yd, xd;
     double xmin, xmax,ymin,ymax;
@@ -635,4 +636,17 @@ void desenha_circulo(double x1, double y1, double raio)
         drawPixel(x1 + xi, y1 - yi);
         drawPixel(x1 - xi, y1 - yi);
     }
+}
+
+void translacao(int x, int y) 
+{
+    for (forward_list<forma>::iterator it_forma = formas.begin(); it_forma != formas.end(); ++it_forma) 
+	{
+        for (forward_list<vertice>::iterator it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); ++it_vertice) 
+		{
+            it_vertice->x += x;
+            it_vertice->y += y;
+        }
+    }
+    glutPostRedisplay();
 }
