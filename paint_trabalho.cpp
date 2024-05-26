@@ -29,7 +29,8 @@ using namespace std;
 #define ESC 27
 
 //Enumeracao com os tipos de formas geometricas
-enum tipo_forma{LIN = 1, TRI = 2, RET = 3, POL = 4, CIR = 4}; // Linha, Triangulo, Retangulo Poligono, Circulo
+enum tipo_forma{LIN = 1, TRI = 2, RET = 3, POL = 4, CIR = 5}; // Linha, Triangulo, Retangulo Poligono, Circulo
+enum tipo_trans {TRA = 1, SCA = 2, ROT = 3, REF = 4, CIS = 5};
 
 //Verifica se foi realizado o primeiro clique do mouse
 bool click1 = false;
@@ -41,8 +42,9 @@ int m_x, m_y;
 //Coordenadas do primeiro clique, do segundo clique do mouse e do terceiro
 int x_1, y_1, x_2, y_2, x_3, y_3;
 
-//Indica o tipo de forma geometrica ativa para desenhar
-int modo = CIR;
+//tipo forma e transformacao
+int modo = LIN, transf = -1;
+
 
 //Largura e altura da janela
 int width = 512, height = 512;
@@ -118,6 +120,7 @@ void init(void);
 void reshape(int w, int h);
 void display(void);
 void menu_popup(int value);
+void menu_transf(int value);
 void keyboard(unsigned char key, int x, int y);
 void mouse(int button, int state, int x, int y);
 void mousePassiveMotion(int x, int y);
@@ -141,17 +144,30 @@ int main(int argc, char** argv){
     glutInitWindowSize (width, height);  // Tamanho da janela do OpenGL
     glutInitWindowPosition (100, 100); //Posicao inicial da janela do OpenGL
     glutCreateWindow ("Computacao Grafica: Paint"); // Da nome para uma janela OpenGL
+    
     init(); // Chama funcao init();
+    
     glutReshapeFunc(reshape); //funcao callback para redesenhar a tela
     glutKeyboardFunc(keyboard); //funcao callback do teclado
     glutMouseFunc(mouse); //funcao callback do mouse
     glutPassiveMotionFunc(mousePassiveMotion); //fucao callback do movimento passivo do mouse
     glutDisplayFunc(display); //funcao callback de desenho
     
+    glutCreateMenu(menu_transf);
+    glutAddMenuEntry("Translacao", TRA);
+    glutAddMenuEntry("Escala", SCA);
+    glutAddMenuEntry("Rotacao", ROT);
+    glutAddMenuEntry("Reflexao", REF);
+    glutAddMenuEntry("Cisalhamento", CIS);
+    glutAttachMenu();
+    
     // Define o menu pop-up
     glutCreateMenu(menu_popup);
     glutAddMenuEntry("Linha", LIN);
-//    glutAddMenuEntry("Retangulo", RET);
+    glutAddMenuEntry("Retangulo", RET);
+    glutAddMenuEntry("Triangulo", TRI);
+	glutAddMenuEntry("Poligono", POL);
+	glutAddMenuEntry("Circunferencia", CIR);
     glutAddMenuEntry("Sair", 0);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 
@@ -210,6 +226,19 @@ void menu_popup(int value){
     modo = value;
 }
 
+void menu_transf(int value)
+{
+	/*if (value == 0) exit(EXIT_SUCCESS);
+	switch (value){
+		case 1: translacao(30, 30); break;
+		case 2: escala(0.4, 0.4); break;
+		case 3: rotacao(45); break;
+		case 4: reflexao(false, true); break;
+		case 5: cisalhamento(0.5, 0); break;
+	}
+	
+	mode = value;*/
+}
 
 /*
  * Controle das teclas comuns do teclado
@@ -362,6 +391,11 @@ void drawFormas()
 	{
 		double raio = sqrt(pow(x_1 - m_x, 2) + pow(y_1 - m_y, 2));
     	if(click1) desenha_circulo(x_1, y_1, raio);
+	}
+
+	if (modo == POL)
+	{
+		if (click1) retaImediata(x_1, y_1, m_x, m_y);
 	}
     
     //Percorre a lista de formas geometricas para desenhar
