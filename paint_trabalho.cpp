@@ -134,10 +134,10 @@ void desenha_quadrilatero(double x1, double y1, double x2, double y2);
 void desenha_triangulo(double x1, double y1, double x2, double y2, double x3, double y3);
 void desenha_circulo(double x1, double x2, double raio);
 void translacao(int x, int y);
-void escala(float sx, float sy);
-void rotacao(float angle);
+void escala(double sx, double sy);
+void rotacao(double angulo);
 void reflexao(bool horizontal, bool vertical);
-void cisalhamento(float shx, float shy);
+void cisalhamento(double x, double y);
 
 /*
  * Funcao principal
@@ -234,10 +234,10 @@ void menu_transf(int value)
 {
 	if (value == 0) exit(EXIT_SUCCESS);
 	switch (value){
-		case 1: translacao(30, 30); break;
-		/*case 2: escala(0.4, 0.4); break;
+		case 1: translacao(15, 15); break;
+		case 2: escala(0.8, 0.8); break;
 		case 3: rotacao(45); break;
-		case 4: reflexao(false, true); break;
+		/*case 4: reflexao(false, true); break;
 		case 5: cisalhamento(0.5, 0); break;*/
 	}
 	
@@ -640,13 +640,42 @@ void desenha_circulo(double x1, double y1, double raio)
 
 void translacao(int x, int y) 
 {
-    for (forward_list<forma>::iterator it_forma = formas.begin(); it_forma != formas.end(); ++it_forma) 
+    for (forward_list<forma>::iterator it_forma = formas.begin(); it_forma != formas.end(); it_forma++) 
 	{
-        for (forward_list<vertice>::iterator it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); ++it_vertice) 
+        for (forward_list<vertice>::iterator it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
 		{
             it_vertice->x += x;
             it_vertice->y += y;
         }
+    }
+    glutPostRedisplay();
+}
+
+void escala(double sx, double sy)
+{
+	for (auto it_forma = formas.begin(); it_forma != formas.end(); it_forma++) 
+	{
+		double centro_x = 0, centro_y = 0;
+		int qtd_vertices = 0;
+		
+		// Descobrindo o centro e recalculando
+        for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
+		{
+            centro_x += it_vertice->x;
+            centro_y += it_vertice->y;
+            qtd_vertices++;
+        }
+
+        if (qtd_vertices == 0) return;
+        
+        centro_x /= qtd_vertices;
+    	centro_y /= qtd_vertices;
+
+    	for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
+		{
+                it_vertice->x = static_cast<int>((it_vertice->x - centro_x) * sx + centro_x);
+  	   	        it_vertice->y = static_cast<int>((it_vertice->y - centro_y) * sy + centro_y);
+		}
     }
     glutPostRedisplay();
 }
