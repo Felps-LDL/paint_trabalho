@@ -41,7 +41,7 @@ int m_x, m_y;
 int x_1, y_1, x_2, y_2, x_3, y_3;
 
 //Indica o tipo de forma geometrica ativa para desenhar
-int modo = TRI;
+int modo = CIR;
 
 //Largura e altura da janela
 int width = 512, height = 512;
@@ -98,9 +98,16 @@ void pushTriangulo(int x1, int y1, int x2, int y2, int x3, int y3){
     pushVertice(x3, y3);
 }
 
-void push_poligono(vector<int> &poligono){
+/*void push_poligono(int x[], int y[]){
     pushForma(POL);
     for (std::vector<vertice>::iterator v = poligs.begin(); v != poligs.end(); ++v)	pushVertice(v->x, v->y);
+}*/
+
+void pushCirculo(int x1, int y1, int x2, int y2)
+{
+	pushForma(CIR);
+	pushVertice(x1, y1);
+    pushVertice(x2, y2);
 }
 
 /*
@@ -121,6 +128,7 @@ void retaImediata(double x1,double y1,double x2,double y2);
 void Bresenham(double x1, double y1, double x2, double y2);
 void desenha_quadrilatero(double x1, double y1, double x2, double y2);
 void desenha_triangulo(double x1, double y1, double x2, double y2, double x3, double y3);
+void desenha_circulo(double x1, double x2, double raio);
 
 
 /*
@@ -274,6 +282,24 @@ void mouse(int button, int state, int x, int y){
 						}
                     }
                 	break;
+                case CIR:
+                    if (state == GLUT_DOWN) {
+                        if (click1)
+						{
+							click1 = false;
+							x_2 = x;
+							y_2 = height - y - 1;
+							pushCirculo(x_1, y_1, x_2, y_2);
+							glutPostRedisplay();
+						}
+						else
+						{
+							click1 = true;
+							x_1 = x;
+							y_1 = height - y - 1;
+						}
+       	   	   	   }
+                	break;
             }
         break;
 
@@ -314,14 +340,16 @@ void drawPixel(int x, int y){
  */
 
 void drawFormas(){
-    //Apos o primeiro clique, desenha a reta com a posicao atual do mouse
-    if(click1) retaImediata(x_1, y_1, m_x, m_y);
+    //if(click1) retaImediata(x_1, y_1, m_x, m_y);
     //if(click1) desenha_quadrilatero(x_1, y_1, m_x, m_y);
-    if(click2) desenha_triangulo(x_1, y_1, m_x, m_y, x_3, y_3);
+    //if(click2) desenha_triangulo(x_1, y_1, m_x, m_y, x_3, y_3);
+    
+    double raio = sqrt(pow(x_1 - m_x, 2) + pow(y_1 - m_y, 2));
+    if(click1) desenha_circulo(x_1, y_1, raio);
     
     //Percorre a lista de formas geometricas para desenhar
     for(forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++){
-    	int i = 0, x[3], y[3];
+    	int i = 0, x[10000], y[10000];
         switch (f->tipo) {
             case LIN:
                 //Percorre a lista de vertices da forma linha para desenhar
@@ -355,14 +383,26 @@ void drawFormas(){
             	
             	break;
             
-   			case POL:
+   			/*case POL:
         		for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
                     x[i] = v->x;
                     y[i] = v->y;
                 }
                 
-            	// Desenha triangulo
-                desenha_poligono(x[0], y[0], x[1], y[1], x[2], y[2]);
+            	// Desenha poligono
+                desenha_poligono(x, y);
+            	
+            	break;*/
+            
+            case CIR:
+        		for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
+                    x[i] = v->x;
+                    y[i] = v->y;
+                }
+                
+            	// Desenha circulo
+            	double raio = sqrt(pow(x[0] - x[1], 2) + pow(y[0] - y[1], 2));
+                desenha_circulo(x[1], y[1], raio);
             	
             	break;
         }
@@ -498,4 +538,49 @@ void desenha_triangulo(double x1, double y1, double x2, double y2, double x3, do
 	Bresenham(x1, y1, x2, y2);
 	Bresenham(x2, y2, x3, y3);
 	Bresenham(x3, y3, x1, y1);
+}
+
+/*void desenha_poligono(vector<int> &poligono)
+{
+	for (int i = 0; i < poligono.size() -1; i++) retaBresenham(x[i], y[i], x[i + 1], y[i + 1]);
+}*/
+
+void desenha_circulo(double x1, double y1, double raio)
+{
+	int d = 1 - raio, incE = 3, incSE = (-2) * raio + 5;
+
+    drawPixel(x1, y1 + raio);
+    drawPixel(x1 + raio, y1);
+    drawPixel(x1, y1 + raio);
+    drawPixel(x1 - raio, y1);
+
+    int xi = 0, yi = raio;
+
+	while(yi > xi)
+    {
+        if (d < 0) 
+		{
+            d += incE;
+            incE += 2;
+            incSE += 2;
+        } 
+		else 
+		{
+            d += incSE;
+            incE += 2;
+            incSE += 4;
+            yi--;
+        }
+        
+        xi++;
+
+	drawPixel(x1 - yi, y1 - xi);
+	drawPixel(x1 - yi, y1 + xi);
+        drawPixel(x1 + xi, y1 + yi);
+        drawPixel(x1 + yi, y1 - xi);
+        drawPixel(x1 + yi, y1 + xi);
+        drawPixel(x1 - xi, y1 + yi);
+        drawPixel(x1 + xi, y1 - yi);
+        drawPixel(x1 - xi, y1 - yi);
+    }
 }
