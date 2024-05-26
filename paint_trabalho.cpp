@@ -28,7 +28,7 @@ using namespace std;
 #define ESC 27
 
 //Enumeracao com os tipos de formas geometricas
-enum tipo_forma{LIN = 1, TRI, RET, POL, CIR }; // Linha, Triangulo, Retangulo Poligono, Circulo
+enum tipo_forma{LIN = 1, TRI = 2, RET = 3, POL = 4, CIR = 4}; // Linha, Triangulo, Retangulo Poligono, Circulo
 
 //Verifica se foi realizado o primeiro clique do mouse
 bool click1 = false;
@@ -37,10 +37,10 @@ bool click1 = false;
 int m_x, m_y;
 
 //Coordenadas do primeiro clique e do segundo clique do mouse
-int x_1, y_1, x_2, y_2, x_3, y_3;
+int x_1, y_1, x_2, y_2, X_3, y_3;
 
 //Indica o tipo de forma geometrica ativa para desenhar
-int modo = LIN;
+int modo = RET;
 
 //Largura e altura da janela
 int width = 512, height = 512;
@@ -215,7 +215,43 @@ void mouse(int button, int state, int x, int y){
                             printf("Clique 1(%d, %d)\n",x_1,y_1);
                         }
                     }
-                break;
+                	break;
+            
+            	case RET:
+                    if (state == GLUT_DOWN) {
+                        if(click1){
+                            x_2 = x;
+                            y_2 = height - y - 1;
+                            printf("Clique 2(%d, %d)\n",x_2,y_2);
+                            pushLinha(x_1, y_1, x_2, y_2);
+                            click1 = false;
+                            glutPostRedisplay();
+                        }else{
+                            click1 = true;
+                            x_1 = x;
+                            y_1 = height - y - 1;
+                            printf("Clique 1(%d, %d)\n",x_1,y_1);
+                        }
+                    }
+                	break;
+                
+                case TRI:
+                    if (state == GLUT_DOWN) {
+                        if(click1){
+                            x_2 = x;
+                            y_2 = height - y - 1;
+                            printf("Clique 2(%d, %d)\n",x_2,y_2);
+                            pushLinha(x_1, y_1, x_2, y_2);
+                            click1 = false;
+                            glutPostRedisplay();
+                        }else{
+                            click1 = true;
+                            x_1 = x;
+                            y_1 = height - y - 1;
+                            printf("Clique 1(%d, %d)\n",x_1,y_1);
+                        }
+                    }
+                	break;
             }
         break;
 
@@ -257,29 +293,38 @@ void drawPixel(int x, int y){
 void drawFormas(){
     //Apos o primeiro clique, desenha a reta com a posicao atual do mouse
     //if(click1) retaImediata(x_1, y_1, m_x, m_y);
-    //if(click1) desenha_quadrilatero(x_1, y_1, m_x, m_y);
-    if(click1) desenha_triangulo(x_1, y_1, x_2, y_2, x_3, y_3);
+    if(click1) desenha_quadrilatero(x_1, y_1, m_x, m_y);
+    
     //Percorre a lista de formas geometricas para desenhar
     for(forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++){
+    	int i = 0, x[3], y[3];
         switch (f->tipo) {
             case LIN:
-                int i = 0, x[2], y[2];
                 //Percorre a lista de vertices da forma linha para desenhar
                 for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
                     x[i] = v->x;
                     y[i] = v->y;
                 }
+                
                 //Desenha o segmento de reta apos dois cliques
-                //Bresenham(x[0], y[0], x[1], y[1]);
+                Bresenham(x[0], y[0], x[1], y[1]);
+            	break;
+            
+            case RET:
+                for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
+                    x[i] = v->x;
+                    y[i] = v->y;
+                }
                 
-                // Desenha quadrilatero
-                //desenha_quadrilatero(x[0], y[0], x[1], y[1]);
-                
-                // Desenha triangulo
+            	// Desenha quadrilatero
+                desenha_quadrilatero(x[0], y[0], x[1], y[1]);
+            	break;
+        
+        	case TRI:
+            	// Desenha triangulo
                 desenha_triangulo(x[0], y[0], x[1], y[1], x[2], y[2]);
-            break;
-//            case RET:
-//            break;
+            	
+            	break;
         }
     }
 }
