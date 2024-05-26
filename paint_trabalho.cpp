@@ -673,9 +673,50 @@ void escala(double sx, double sy)
 
     	for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
 		{
-                it_vertice->x = static_cast<int>((it_vertice->x - centro_x) * sx + centro_x);
-  	   	        it_vertice->y = static_cast<int>((it_vertice->y - centro_y) * sy + centro_y);
+                it_vertice->x = ((it_vertice->x - centro_x) * sx + centro_x);
+  	   	        it_vertice->y = ((it_vertice->y - centro_y) * sy + centro_y);
 		}
     }
+    glutPostRedisplay();
+}
+
+void rotacao(double angulo)
+{
+	double rads = angulo * 3.14159265 / 180.0, sen = sin(rads), coss = cos(rads);
+	
+    for (auto it_forma = formas.begin(); it_forma != formas.end(); it_forma++) 
+	{
+        double centro_x = 0, centro_y = 0;
+		int qtd_vertices = 0;
+
+        // Descobrindo o centro e recalculando
+        for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
+		{
+            centro_x += it_vertice->x;
+            centro_y += it_vertice->y;
+            qtd_vertices++;
+        }
+
+        if (qtd_vertices == 0) return;
+        
+ 	    centro_x /= qtd_vertices;
+        centro_y /= qtd_vertices;
+
+		// Transladar para a origem
+		for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++) 
+		{
+            it_vertice->x -= centro_x;
+ 	 	    it_vertice->y -= centro_y;
+        }
+
+		// Rotacionar
+    	for (auto it_vertice = it_forma->v.begin(); it_vertice != it_forma->v.end(); it_vertice++)
+        {
+        	double dx = it_vertice->x, dy = it_vertice->y;
+        	
+			it_vertice->x = round(dx * coss - dy * sen + centro_x);
+			it_vertice->y = round(dx * sen + dy * coss + centro_y);
+		}
+	}
     glutPostRedisplay();
 }
