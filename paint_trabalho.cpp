@@ -32,15 +32,16 @@ enum tipo_forma{LIN = 1, TRI = 2, RET = 3, POL = 4, CIR = 4}; // Linha, Triangul
 
 //Verifica se foi realizado o primeiro clique do mouse
 bool click1 = false;
+bool click2 = false;
 
 //Coordenadas da posicao atual do mouse
 int m_x, m_y;
 
-//Coordenadas do primeiro clique e do segundo clique do mouse
-int x_1, y_1, x_2, y_2, X_3, y_3;
+//Coordenadas do primeiro clique, do segundo clique do mouse e do terceiro
+int x_1, y_1, x_2, y_2, x_3, y_3;
 
 //Indica o tipo de forma geometrica ativa para desenhar
-int modo = RET;
+int modo = TRI;
 
 //Largura e altura da janela
 int width = 512, height = 512;
@@ -82,6 +83,24 @@ void pushLinha(int x1, int y1, int x2, int y2){
     pushForma(LIN);
     pushVertice(x1, y1);
     pushVertice(x2, y2);
+}
+
+void pushRetangulo(int x1, int y1, int x2, int y2){
+    pushForma(RET);
+    pushVertice(x1, y1);
+    pushVertice(x2, y2);
+}
+
+void pushTriangulo(int x1, int y1, int x2, int y2, int x3, int y3){
+    pushForma(TRI);
+    pushVertice(x1, y1);
+    pushVertice(x2, y2);
+    pushVertice(x3, y3);
+}
+
+void push_poligono(vector<int> &poligono){
+    pushForma(POL);
+    for (std::vector<vertice>::iterator v = poligs.begin(); v != poligs.end(); ++v)	pushVertice(v->x, v->y);
 }
 
 /*
@@ -204,7 +223,6 @@ void mouse(int button, int state, int x, int y){
                         if(click1){
                             x_2 = x;
                             y_2 = height - y - 1;
-                            printf("Clique 2(%d, %d)\n",x_2,y_2);
                             pushLinha(x_1, y_1, x_2, y_2);
                             click1 = false;
                             glutPostRedisplay();
@@ -212,7 +230,6 @@ void mouse(int button, int state, int x, int y){
                             click1 = true;
                             x_1 = x;
                             y_1 = height - y - 1;
-                            printf("Clique 1(%d, %d)\n",x_1,y_1);
                         }
                     }
                 	break;
@@ -222,15 +239,13 @@ void mouse(int button, int state, int x, int y){
                         if(click1){
                             x_2 = x;
                             y_2 = height - y - 1;
-                            printf("Clique 2(%d, %d)\n",x_2,y_2);
-                            pushLinha(x_1, y_1, x_2, y_2);
+                            pushRetangulo(x_1, y_1, x_2, y_2);
                             click1 = false;
                             glutPostRedisplay();
                         }else{
                             click1 = true;
                             x_1 = x;
                             y_1 = height - y - 1;
-                            printf("Clique 1(%d, %d)\n",x_1,y_1);
                         }
                     }
                 	break;
@@ -238,18 +253,25 @@ void mouse(int button, int state, int x, int y){
                 case TRI:
                     if (state == GLUT_DOWN) {
                         if(click1){
-                            x_2 = x;
-                            y_2 = height - y - 1;
-                            printf("Clique 2(%d, %d)\n",x_2,y_2);
-                            pushLinha(x_1, y_1, x_2, y_2);
+                            x_3 = x;
+                            y_3 = height - y - 1;
                             click1 = false;
-                            glutPostRedisplay();
-                        }else{
-                            click1 = true;
-                            x_1 = x;
-                            y_1 = height - y - 1;
-                            printf("Clique 1(%d, %d)\n",x_1,y_1);
+                            click2 = true;
                         }
+						else if (click2)
+						{
+							x_2 = x;
+                            y_2 = height - y - 1;
+                            pushTriangulo(x_1, y_1, x_2, y_2, x_3, y_3);
+                            click2 = false;
+                            glutPostRedisplay();
+                        }
+                        else
+						{
+							click1 = true;
+							x_1 = x;
+							y_1 = height - y - 1;
+						}
                     }
                 	break;
             }
@@ -290,10 +312,12 @@ void drawPixel(int x, int y){
 /*
  *Funcao que desenha a lista de formas geometricas
  */
+
 void drawFormas(){
     //Apos o primeiro clique, desenha a reta com a posicao atual do mouse
-    //if(click1) retaImediata(x_1, y_1, m_x, m_y);
-    if(click1) desenha_quadrilatero(x_1, y_1, m_x, m_y);
+    if(click1) retaImediata(x_1, y_1, m_x, m_y);
+    //if(click1) desenha_quadrilatero(x_1, y_1, m_x, m_y);
+    if(click2) desenha_triangulo(x_1, y_1, m_x, m_y, x_3, y_3);
     
     //Percorre a lista de formas geometricas para desenhar
     for(forward_list<forma>::iterator f = formas.begin(); f != formas.end(); f++){
@@ -321,8 +345,24 @@ void drawFormas(){
             	break;
         
         	case TRI:
+        		for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
+                    x[i] = v->x;
+                    y[i] = v->y;
+                }
+                
             	// Desenha triangulo
                 desenha_triangulo(x[0], y[0], x[1], y[1], x[2], y[2]);
+            	
+            	break;
+            
+   			case POL:
+        		for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
+                    x[i] = v->x;
+                    y[i] = v->y;
+                }
+                
+            	// Desenha triangulo
+                desenha_poligono(x[0], y[0], x[1], y[1], x[2], y[2]);
             	
             	break;
         }
@@ -459,4 +499,3 @@ void desenha_triangulo(double x1, double y1, double x2, double y2, double x3, do
 	Bresenham(x2, y2, x3, y3);
 	Bresenham(x3, y3, x1, y1);
 }
-
