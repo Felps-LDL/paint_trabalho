@@ -2,6 +2,7 @@
  * Computacao Grafica
  * Codigo Exemplo: Rasterizacao de Segmentos de Reta com GLUT/OpenGL
  * Autor: Prof. Laurindo de Sousa Britto Neto
+ * Felipe Lages de Lima
  */
 
 // Bibliotecas utilizadas pelo OpenGL
@@ -100,11 +101,6 @@ void pushTriangulo(int x1, int y1, int x2, int y2, int x3, int y3){
     pushVertice(x2, y2);
     pushVertice(x3, y3);
 }
-
-/*void push_poligono(int x[], int y[]){
-    pushForma(POL);
-    for (std::vector<vertice>::iterator v = poligs.begin(); v != poligs.end(); ++v)	pushVertice(v->x, v->y);
-}*/
 
 void pushCirculo(int x1, int y1, int x2, int y2)
 {
@@ -250,6 +246,9 @@ void menu_transf(int value)
 void keyboard(unsigned char key, int x, int y){
     switch (key) { // key - variavel que possui valor ASCII da tecla precionada
         case ESC: exit(EXIT_SUCCESS); break;
+        case 32: 
+        	click1 = false;
+        	break;
     }
 }
 
@@ -334,6 +333,25 @@ void mouse(int button, int state, int x, int y){
 						}
        	   	   	   }
                 	break;
+                
+                /*case POL:
+	                if(click1)
+					{
+						x_2 = x;
+						y_2 = height - y - 1;
+						pushLinha(x_1, y_1, x_2, y_2);
+						glutPostRedisplay();
+					}
+					else
+					{
+						click1 = true;
+						x_1 = x;
+						y_1 = height - y - 1;
+					}
+					glutPostRedisplay();
+					}
+			}*/
+			break;
             }
         break;
 
@@ -399,7 +417,7 @@ void drawFormas()
 
 	if (modo == POL)
 	{
-		if (click1) retaImediata(x_1, y_1, m_x, m_y);
+		//if (click1) retaImediata(x_1, y_1, m_x, m_y); ??
 	}
     
     //Percorre a lista de formas geometricas para desenhar
@@ -439,16 +457,16 @@ void drawFormas()
             	
             	break;
             
-   			/*case POL:
+   			case POL:
         		for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
                     x[i] = v->x;
                     y[i] = v->y;
                 }
                 
             	// Desenha poligono
-                desenha_poligono(x, y);
+                //desenha_poligono(x, y);
             	
-            	break;*/
+            	break;
             
             case CIR:
         		for(forward_list<vertice>::iterator v = f->v.begin(); v != f->v.end(); v++, i++){
@@ -504,7 +522,7 @@ void retaImediata(double x1, double y1, double x2, double y2){
     drawPixel((int)x2,(int)y2);
 }
 
-// ok!!!
+// reta
 void Bresenham(double x1, double y1, double x2, double y2)
 {
 	double incE, incNE, d, temp, deltax, deltay, xi, yi;
@@ -578,6 +596,7 @@ void Bresenham(double x1, double y1, double x2, double y2)
 	drawPixel(xi, yi);
 }
 
+
 void desenha_quadrilatero(double x1, double y1, double x2, double y2)
 {
 	Bresenham(x1, y1, x1, y2);
@@ -593,10 +612,11 @@ void desenha_triangulo(double x1, double y1, double x2, double y2, double x3, do
 	Bresenham(x3, y3, x1, y1);
 }
 
-/*void desenha_poligono(vector<int> &poligono)
+void desenha_poligono(vector<int> x, vector<int> y)
 {
-	for (int i = 0; i < poligono.size() -1; i++) retaBresenham(x[i], y[i], x[i + 1], y[i + 1]);
-}*/
+	// desenha do primeiro e ultimo ponto uma reta ao atual
+	//retaBresenham(x[0], y[0], x[x.size() - 1], y[y.size() - 1]);??
+}
 
 void desenha_circulo(double x1, double y1, double raio)
 {
